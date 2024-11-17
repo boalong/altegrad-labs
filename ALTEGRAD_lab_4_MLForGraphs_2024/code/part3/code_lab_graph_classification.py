@@ -11,20 +11,14 @@ from torch_geometric.datasets import TUDataset
 from torch_geometric.utils import to_networkx
 
 ############## Task 7
-
-
 #load Mutag dataset
 def load_dataset():
-
-    ##################
-    # your code here #
-    ##################
-
+    dataset = TUDataset(root='tmp/MUTAG', name='MUTAG')
+    Gs = [to_networkx(data, to_undirected=True) for data in dataset]
     y = [data.y.item() for data in dataset]
     return Gs, y
 
-
-Gs,y = load_dataset()
+Gs, y = load_dataset()
 
 #Gs, y = create_dataset()
 G_train, G_test, y_train, y_test = train_test_split(Gs, y, test_size=0.2, random_state=42)
@@ -85,7 +79,6 @@ def shortest_path_kernel(Gs_train, Gs_test):
     return K_train, K_test
 
 
-
 ############## Task 8
 # Compute the graphlet kernel
 def graphlet_kernel(Gs_train, Gs_test, n_samples=200):
@@ -106,17 +99,27 @@ def graphlet_kernel(Gs_train, Gs_test, n_samples=200):
     graphlets[3].add_edge(0,2)
 
     
-    phi_train = np.zeros((len(G_train), 4))
-    
-    ##################
-    # your code here #
-    ##################
+    phi_train = np.zeros((len(Gs_train), 4))
+    Gs_train_nodes = list(Gs_train)
+    # sample graphlets from Gs_train
+    for i in range(num_samples):
+        sampled_nodes = np.random.choice(Gs_train_nodes, 3)
+        graphlet = Gs_train.subgraph(sampled_nodes)
+        for j, glet in enumerate(graphlets):
+            phi_train[i, j] = int(nx.is_isomorphic(graphlet, glet))
+    phi_train = phi_train.sum(axis=0)
+    print(phi_train)
 
-    phi_test = np.zeros((len(G_test), 4))
-    
-    ##################
-    # your code here #
-    ##################
+    phi_test = np.zeros((len(Gs_test), 4))
+    Gs_test_nodes = list(Gs_test)
+    # sample graphlets from Gs_test
+    for i in range(num_samples):
+        sampled_nodes = np.random.choice(Gs_test_nodes, 3)
+        graphlet = Gs_test.subgraph(sampled_nodes)
+        for j, glet in enumerate(graphlets):
+            phi_test[i, j] = int(nx.is_isomorphic(graphlet, glet))
+    phi_test = phi_test.sum(axis=0)
+    print(phi_test)
 
     K_train = np.dot(phi_train, phi_train.T)
     K_test = np.dot(phi_test, phi_train.T)
@@ -125,7 +128,7 @@ def graphlet_kernel(Gs_train, Gs_test, n_samples=200):
 
 
 K_train_sp, K_test_sp = shortest_path_kernel(G_train, G_test)
-
+K_train_graphlet, K_test_graphelet = graphlet_kernel(G_train, G_test)
 
 
 ############## Task 9
