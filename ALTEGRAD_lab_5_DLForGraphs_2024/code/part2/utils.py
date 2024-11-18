@@ -9,12 +9,12 @@ from sklearn.preprocessing import LabelEncoder
 
 def normalize_adjacency(A):
     ############## Task 9
+    A_tilde = A + sp.identity(A.shape[0])
+    normalization_D = sp.diags(A_tilde.sum(axis=1))
+    normalization_D.data = 1 / np.sqrt(normalization_D.data)
+    A_normalized = normalization_D * A_tilde * normalization_D
 
-    ##################
-    # your code here #
-    ##################
-    
-	return A_normalized
+    return A_normalized
 
 
 def load_cora():

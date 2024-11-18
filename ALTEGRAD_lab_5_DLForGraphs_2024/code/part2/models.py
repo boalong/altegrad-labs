@@ -19,10 +19,15 @@ class GNN(nn.Module):
 
     def forward(self, x_in, adj):
         ############## Tasks 10 and 13
-        
-        ##################
-        # your code here #
-        ##################
+        z0 = self.fc1(x_in)
+        z0 = torch.mm(adj, z0)
+        z0 = self.relu(z0)
+        z0 = self.dropout(z0)
 
+        z1 = self.fc2(z0)
+        z1 = torch.mm(adj, z1)
+        z1 = self.relu(z1)
+
+        x = self.fc3(z1)
 
         return F.log_softmax(x, dim=1)
