@@ -21,21 +21,18 @@ n_dim = 128
 n_walks = 10
 walk_length = 20
 
-##################
-# your code here #
-##################
+model = deepwalk(G, n_walks, walk_length, n_dim)
+
 
 ############## Task 4
 # Visualizes the representations of the 100 nodes that appear most frequently in the generated walks
 def visualize(model, n, dim):
 
-    nodes = # your code here
+    nodes = model.wv.index_to_key # your code here
     DeepWalk_embeddings = np.empty(shape=(n, dim))
     
-    ##################
-    # your code here #
-    ##################
-
+    for ix, node in enumerate(nodes[:n]):
+        DeepWalk_embeddings[ix, :] = model.wv[node]
 
     my_pca = PCA(n_components=10)
     my_tsne = TSNE(n_components=2)

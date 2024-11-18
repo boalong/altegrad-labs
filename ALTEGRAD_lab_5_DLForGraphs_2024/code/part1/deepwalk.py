@@ -7,28 +7,30 @@ import networkx as nx
 from random import randint
 from gensim.models import Word2Vec
 
+from tqdm import tqdm
+
 
 ############## Task 1
 # Simulates a random walk of length "walk_length" starting from node "node"
 def random_walk(G, node, walk_length):
-
-    ##################
-    # your code here #
-    ##################
+    walk = [node]
+    for _ in range(walk_length-1):
+        node = np.random.choice(list(G.neighbors(node)))
+        walk.append(node)
     
-	walk = [str(node) for node in walk]
-	return walk
+    walk = [str(node) for node in walk]
+    return walk
 
 
 ############## Task 2
 # Runs "num_walks" random walks from each node
 def generate_walks(G, num_walks, walk_length):
     walks = []
-    
-    ##################
-    # your code here #
-    ##################
+    for node in tqdm(list(G)):
+        for _ in range(num_walks):
+            walks.append(random_walk(G, node, walk_length))
 
+    permuted_walks = np.random.permutation(walks)
     return permuted_walks.tolist()
 
 

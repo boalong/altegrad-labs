@@ -35,10 +35,7 @@ y = np.array(y)
 
 ############## Task 5
 # Visualizes the karate network
-
-##################
-# your code here #
-##################
+nx.draw_networkx(G, node_color=y)
 
 
 ############## Task 6
@@ -46,7 +43,7 @@ y = np.array(y)
 n_dim = 128
 n_walks = 10
 walk_length = 20
-model = # your code here
+model = deepwalk(G, n_walks, walk_length, n_dim)
 
 embeddings = np.zeros((n, n_dim))
 for i, node in enumerate(G.nodes()):
@@ -65,16 +62,32 @@ y_test = y[idx_test]
 
 ############## Task 7
 # Trains a logistic regression classifier and use it to make predictions
-
-
-##################
-# your code here #
-##################
+clf = LogisticRegression().fit(X_train, y_train)
+y_pred = clf.predict(X_test)
+print(f'Accuracy with deepwalk embeddings: {accuracy_score(y_test, y_pred)}')
 
 
 ############## Task 8
 # Generates spectral embeddings
+def spectral_embeddings(G, d=10):
+    # 1. A is the adjacency matrix of the graph
+    A = nx.adjacency_matrix(G)
+    # 2. Compute Laplacian matrix
+    n_nodes = A.shape[0]
+    I = eye(n_nodes)
+    D_inverse = diags(1 / A.sum(axis=0))
+    L_rw = I - D_inverse @ A
+    # 3. Eigenvalue decomposition
+    eigenvalues, eigenvectors = eigs(L_rw, d, which='SM')
+    idx = np.argsort(eigenvalues)
+    U = np.vstack(eigenvectors[:, idx]).real
 
-##################
-# your code here #
-##################
+    return U
+
+embeddings_spectral = spectral_embeddings(G, 2)
+X_train_spectral = embeddings_spectral[idx_train,:]
+X_test_spectral = embeddings_spectral[idx_test,:]
+
+clf_spectral = LogisticRegression().fit(X_train_spectral, y_train)
+y_pred_spectral = clf_spectral.predict(X_test_spectral)
+print(f'Accuracy with spectral embeddings: {accuracy_score(y_test, y_pred_spectral)}')
