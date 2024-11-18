@@ -10,6 +10,13 @@ from sklearn.metrics import accuracy_score
 from torch_geometric.datasets import TUDataset
 from torch_geometric.utils import to_networkx
 
+# import matplotlib.pyplot as plt
+# def visualize_graph(G, filename):
+#     plt.figure(figsize=(12, 5))
+#     nx.draw(G, with_labels=True, node_color='lightblue', 
+#             node_size=500, font_size=16, font_weight='bold')    
+#     plt.savefig(filename)
+
 ############## Task 7
 #load Mutag dataset
 def load_dataset():
@@ -66,8 +73,7 @@ def shortest_path_kernel(Gs_train, Gs_test):
     for i in range(len(Gs_train)):
         for length in sp_counts_train[i]:
             phi_train[i,all_paths[length]] = sp_counts_train[i][length]
-    
-  
+
     phi_test = np.zeros((len(Gs_test), len(all_paths)))
     for i in range(len(Gs_test)):
         for length in sp_counts_test[i]:
@@ -77,6 +83,23 @@ def shortest_path_kernel(Gs_train, Gs_test):
     K_test = np.dot(phi_test, phi_train.T)
 
     return K_train, K_test
+
+# P4 = nx.Graph()
+# P4.add_nodes_from(range(4))
+# P4.add_edge(0,1)
+# P4.add_edge(1,2)
+# P4.add_edge(2,3)
+# visualize_graph(P4, 'glet.png')
+
+# C4 = nx.Graph()
+# C4.add_nodes_from(range(4))
+# C4.add_edge(0,1)
+# C4.add_edge(1,2)
+# C4.add_edge(2,3)
+# C4.add_edge(3,0)
+# visualize_graph(C4, 'fig.png')
+
+# print(shortest_path_kernel([P4, C4], [P4, C4]))
 
 
 ############## Task 8
@@ -100,26 +123,27 @@ def graphlet_kernel(Gs_train, Gs_test, n_samples=200):
 
     
     phi_train = np.zeros((len(Gs_train), 4))
-    Gs_train_nodes = list(Gs_train)
-    # sample graphlets from Gs_train
-    for i in range(num_samples):
-        sampled_nodes = np.random.choice(Gs_train_nodes, 3)
-        graphlet = Gs_train.subgraph(sampled_nodes)
-        for j, glet in enumerate(graphlets):
-            phi_train[i, j] = int(nx.is_isomorphic(graphlet, glet))
-    phi_train = phi_train.sum(axis=0)
-    print(phi_train)
+
+    for i, G in enumerate(Gs_train):
+        G_nodes = list(G)
+        # sample graphlets from G
+        for _ in range(n_samples):
+            sampled_nodes = np.random.choice(G_nodes, 3, replace=False)
+            graphlet = G.subgraph(sampled_nodes)
+            for j, glet in enumerate(graphlets):
+                phi_train[i, j] += int(nx.is_isomorphic(graphlet, glet))
+    #print(phi_train)
 
     phi_test = np.zeros((len(Gs_test), 4))
-    Gs_test_nodes = list(Gs_test)
-    # sample graphlets from Gs_test
-    for i in range(num_samples):
-        sampled_nodes = np.random.choice(Gs_test_nodes, 3)
-        graphlet = Gs_test.subgraph(sampled_nodes)
-        for j, glet in enumerate(graphlets):
-            phi_test[i, j] = int(nx.is_isomorphic(graphlet, glet))
-    phi_test = phi_test.sum(axis=0)
-    print(phi_test)
+    for i, G in enumerate(Gs_test):
+        G_nodes = list(G)
+        # sample graphlets from G
+        for _ in range(n_samples):
+            sampled_nodes = np.random.choice(G_nodes, 3, replace=False)
+            graphlet = G.subgraph(sampled_nodes)
+            for j, glet in enumerate(graphlets):
+                phi_test[i, j] += int(nx.is_isomorphic(graphlet, glet))
+    #print(phi_test)
 
     K_train = np.dot(phi_train, phi_train.T)
     K_test = np.dot(phi_test, phi_train.T)
@@ -128,19 +152,31 @@ def graphlet_kernel(Gs_train, Gs_test, n_samples=200):
 
 
 K_train_sp, K_test_sp = shortest_path_kernel(G_train, G_test)
-K_train_graphlet, K_test_graphelet = graphlet_kernel(G_train, G_test)
-
 
 ############## Task 9
+K_train_graphlet, K_test_graphlet = graphlet_kernel(G_train, G_test)
 
-##################
-# your code here #
-##################
+# G1 = nx.Graph()
+# G1.add_nodes_from(range(4))
+# G1.add_edge(0,1)
+# G1.add_edge(1,2)
+# G1.add_edge(2,3)
+# G1.add_edge(3,0)
 
+# G2 = nx.Graph()
+# G2.add_nodes_from(range(4))
 
+# print(graphlet_kernel([G1], [G2])[1])
 
 ############## Task 10
+# SP
+clf_sp = SVC(kernel='precomputed')
+clf_sp.fit(K_train_sp, y_train)
+y_pred_sp = clf_sp.predict(K_test_sp)
+print(f'Accuracy with shortest path kernel: {accuracy_score(y_test, y_pred_sp)}')
 
-##################
-# your code here #
-##################
+# Graphlets
+clf_graphlet = SVC(kernel='precomputed')
+clf_graphlet.fit(K_train_graphlet, y_train)
+y_pred_graphlet = clf_graphlet.predict(K_test_graphlet)
+print(f'Accuracy with graphlet kernel: {accuracy_score(y_test, y_pred_graphlet)}')

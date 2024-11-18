@@ -10,9 +10,9 @@ def load_file(filename):
 
     with open(filename, encoding='utf8', errors='ignore') as f:
         for line in f:
-            content = line.split(':')
+            content = line.split(' ')
             labels.append(content[0])
-            docs.append(content[1][:-1])
+            docs.append(' '.join(content[1:-1]))
     
     return docs,labels  
 
@@ -61,9 +61,8 @@ def get_vocab(train_docs, test_docs):
         
     return vocab
 
-
-path_to_train_set = '../datasets/train_5500_coarse.label'
-path_to_test_set = '../datasets/TREC_10_coarse.label'
+path_to_train_set = '/home/onyxia/work/altegrad-labs/ALTEGRAD_lab_4_MLForGraphs_2024/code/datasets/train_5500_coarse.label'
+path_to_test_set = '/home/onyxia/work/altegrad-labs/ALTEGRAD_lab_4_MLForGraphs_2024/code/datasets/TREC_10_coarse.label'
 
 # Read and pre-process train data
 train_data, y_train = load_file(path_to_train_set)
@@ -85,12 +84,19 @@ import matplotlib.pyplot as plt
 
 def create_graphs_of_words(docs, vocab, window_size):
     graphs = list()
-    for idx,doc in enumerate(docs):
+    for idx, doc in enumerate(docs):
         G = nx.Graph()
-    
-        ##################
-        # your code here #
-        ##################
+        doc_indexes = [vocab[tok] for tok in doc]
+        G.add_nodes_from(set(doc_indexes))
+        index_to_vocab = {v:k for k, v in vocab.items()}
+        for node in G.nodes():
+            G.nodes[node]['label'] = index_to_vocab[node]
+        for i, tok in enumerate(doc_indexes):
+            for j in range(1, window_size+1):
+                if i-j >= 0:
+                    G.add_edge(tok, doc_indexes[i-j])
+                else:
+                    break
         
         graphs.append(G)
     
@@ -102,7 +108,7 @@ G_train_nx = create_graphs_of_words(train_data, vocab, 3)
 G_test_nx = create_graphs_of_words(test_data, vocab, 3)
 
 print("Example of graph-of-words representation of document")
-nx.draw_networkx(G_train_nx[3], with_labels=True)
+nx.draw_networkx(G_train_nx[3], with_labels=False)
 plt.show()
 
 
@@ -116,23 +122,22 @@ from sklearn.metrics import accuracy_score
 # Task 12
 
 # Transform networkx graphs to grakel representations
-G_train = # your code here #
-G_test = # your code here #
+G_train = graph_from_networkx(G_train_nx, node_labels_tag='label') # your code here #
+G_test = graph_from_networkx(G_test_nx, node_labels_tag='label') # your code here #
 
 # Initialize a Weisfeiler-Lehman subtree kernel
-gk = # your code here #
+gk = WeisfeilerLehman(base_graph_kernel=VertexHistogram, normalize=True) # your code here #
 
 # Construct kernel matrices
-K_train = # your code here #
-K_test = # your code here #
+K_train = gk.fit_transform(G_train) # your code here #
+K_test = gk.transform(G_test) # your code here #
 
 #Task 13
 
 # Train an SVM classifier and make predictions
-
-##################
-# your code here #
-##################
+clf = SVC(kernel="precomputed")
+clf.fit(K_train, y_train)
+y_pred = clf.predict(K_test)
 
 # Evaluate the predictions
 print("Accuracy:", accuracy_score(y_pred, y_test))
