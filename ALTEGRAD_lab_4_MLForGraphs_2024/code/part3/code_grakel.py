@@ -11,8 +11,8 @@ def load_file(filename):
     with open(filename, encoding='utf8', errors='ignore') as f:
         for line in f:
             content = line.split(' ')
-            labels.append(content[0])
-            docs.append(' '.join(content[1:-1]))
+            labels.append(content[0].split(':')[0])
+            docs.append(' '.join(content[1:]))
     
     return docs,labels  
 
@@ -67,10 +67,14 @@ path_to_test_set = '/home/onyxia/work/altegrad-labs/ALTEGRAD_lab_4_MLForGraphs_2
 # Read and pre-process train data
 train_data, y_train = load_file(path_to_train_set)
 train_data = preprocessing(train_data)
+#train_data = train_data[:100]
+#y_train = y_train[:100]
 
 # Read and pre-process test data
 test_data, y_test = load_file(path_to_test_set)
 test_data = preprocessing(test_data)
+#test_data = test_data[:100]
+#y_test = y_test[:100]
 
 # Extract vocabulary
 vocab = get_vocab(train_data, test_data)
@@ -86,15 +90,14 @@ def create_graphs_of_words(docs, vocab, window_size):
     graphs = list()
     for idx, doc in enumerate(docs):
         G = nx.Graph()
-        doc_indexes = [vocab[tok] for tok in doc]
-        G.add_nodes_from(set(doc_indexes))
-        index_to_vocab = {v:k for k, v in vocab.items()}
-        for node in G.nodes():
-            G.nodes[node]['label'] = index_to_vocab[node]
-        for i, tok in enumerate(doc_indexes):
-            for j in range(1, window_size+1):
-                if i-j >= 0:
-                    G.add_edge(tok, doc_indexes[i-j])
+        for i, doci in enumerate(doc):
+            if doci not in G.nodes():
+                G.add_node(doci)
+                G.nodes[doci]['label'] = vocab[doci]
+        for i, doci in enumerate(doc):
+            for j in range(i+1, i+window_size):
+                if j < len(doc):
+                    G.add_edge(doci, doc[j])
                 else:
                     break
         
@@ -108,12 +111,12 @@ G_train_nx = create_graphs_of_words(train_data, vocab, 3)
 G_test_nx = create_graphs_of_words(test_data, vocab, 3)
 
 print("Example of graph-of-words representation of document")
-nx.draw_networkx(G_train_nx[3], with_labels=False)
+nx.draw_networkx(G_train_nx[3], with_labels=True)
 plt.show()
 
 
 from grakel.utils import graph_from_networkx
-from grakel.kernels import WeisfeilerLehman, VertexHistogram
+from grakel.kernels import WeisfeilerLehman, VertexHistogram, LovaszTheta
 from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score
 
@@ -122,11 +125,11 @@ from sklearn.metrics import accuracy_score
 # Task 12
 
 # Transform networkx graphs to grakel representations
-G_train = graph_from_networkx(G_train_nx, node_labels_tag='label') # your code here #
-G_test = graph_from_networkx(G_test_nx, node_labels_tag='label') # your code here #
+G_train = list(graph_from_networkx(G_train_nx, node_labels_tag='label')) # your code here #
+G_test = list(graph_from_networkx(G_test_nx, node_labels_tag='label')) # your code here #
 
 # Initialize a Weisfeiler-Lehman subtree kernel
-gk = WeisfeilerLehman(base_graph_kernel=VertexHistogram, normalize=True) # your code here #
+gk = WeisfeilerLehman(n_iter=1, base_graph_kernel=VertexHistogram, normalize=False) # your code here #
 
 # Construct kernel matrices
 K_train = gk.fit_transform(G_train) # your code here #
@@ -140,12 +143,95 @@ clf.fit(K_train, y_train)
 y_pred = clf.predict(K_test)
 
 # Evaluate the predictions
-print("Accuracy:", accuracy_score(y_pred, y_test))
+print("Accuracy, Weisfeiler-Lehman subtree kernel:", accuracy_score(y_pred, y_test))
 
+'''
+Accuracy, Weisfeiler-Lehman subtree kernel: 0.858
+'''
 
 #Task 14
+from grakel.kernels import (
+    RandomWalk, 
+    RandomWalkLabeled, 
+    PyramidMatch, 
+    NeighborhoodHash, 
+    ShortestPath, 
+    ShortestPathAttr, 
+    GraphletSampling, 
+    SubgraphMatching,
+    HadamardCode,
+    NeighborhoodSubgraphPairwiseDistance,
+    LovaszTheta,
+    SvmTheta,
+    Propagation,
+    PropagationAttr,
+    OddSth,
+    MultiscaleLaplacian,
+    VertexHistogram,
+    EdgeHistogram,
+    GraphHopper,
+    CoreFramework,
+    WeisfeilerLehmanOptimalAssignment
+)
 
+from time import time
+def evaluate_kernel(kernel_class, G_train, G_test, y_train, y_test, **kernel_params):
+    try:
+        start = time()
+        # Initialize kernel with parameters
+        gk = kernel_class(**kernel_params)
+        
+        # Print graph format for debugging
+        print(f"\nTesting {kernel_class.__name__}")
+        
+        # Compute kernel matrices
+        K_train = gk.fit_transform(G_train)
+        K_test = gk.transform(G_test)
+        
+        # Train and evaluate
+        clf = SVC(kernel="precomputed")
+        clf.fit(K_train, y_train)
+        y_pred = clf.predict(K_test)
+        
+        acc = accuracy_score(y_pred, y_test)
+        print(f"Accuracy, {kernel_class.__name__}: {acc:.3f}")
+        print(f"Time: {time()-start}")
+        return acc
+        
+    except Exception as e:
+        print(f"Error with {kernel_class.__name__}: {str(e)}")
+        return None
 
-##################
-# your code here #
-##################
+kernels_to_test = [(kernel, {}) for kernel in [
+    # PyramidMatch,
+    # NeighborhoodHash, 
+    # ShortestPath, 
+    # GraphletSampling, 
+    SvmTheta,
+    # Propagation,
+    # OddSth,
+    VertexHistogram
+    # CoreFramework,
+    # WeisfeilerLehmanOptimalAssignment
+]]
+
+kernels_to_test.append((HadamardCode, {"n_iter":1}))
+
+for kernel_class, params in kernels_to_test:
+    evaluate_kernel(kernel_class, G_train, G_test, y_train, y_test, **params)
+
+'''
+Output for the kernels that can be computed in a reasonable time:
+
+Testing SvmTheta
+Accuracy, SvmTheta: 0.302
+Time: 73.13027381896973
+
+Testing VertexHistogram
+Accuracy, VertexHistogram: 0.864
+Time: 4.633118391036987
+
+Testing HadamardCode
+Accuracy, HadamardCode: 0.864
+Time: 122.49105095863342
+'''
