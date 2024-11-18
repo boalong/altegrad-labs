@@ -30,4 +30,4 @@ class GNN(nn.Module):
 
         x = self.fc3(z1)
 
-        return F.log_softmax(x, dim=1)
+        return F.log_softmax(x, dim=1), z1

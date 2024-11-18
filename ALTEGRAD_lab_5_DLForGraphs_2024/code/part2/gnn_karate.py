@@ -25,14 +25,14 @@ learning_rate = 0.01
 dropout_rate = 0.1
 
 # Loads the karate network
-G = nx.read_weighted_edgelist('../data/karate.edgelist', delimiter=' ', nodetype=int, create_using=nx.Graph())
+G = nx.read_weighted_edgelist('/home/onyxia/work/altegrad-labs/ALTEGRAD_lab_5_DLForGraphs_2024/code/data/karate.edgelist', delimiter=' ', nodetype=int, create_using=nx.Graph())
 print(G.number_of_nodes())
 print(G.number_of_edges())
 
 n = G.number_of_nodes()
 
 # Loads the class labels
-class_labels = np.loadtxt('../data/karate_labels.txt', delimiter=',', dtype=np.int32)
+class_labels = np.loadtxt('/home/onyxia/work/altegrad-labs/ALTEGRAD_lab_5_DLForGraphs_2024/code/data/karate_labels.txt', delimiter=',', dtype=np.int32)
 idx_to_class_label = dict()
 for i in range(class_labels.shape[0]):
     idx_to_class_label[class_labels[i,0]] = class_labels[i,1]
@@ -49,8 +49,8 @@ adj = normalize_adjacency(adj) # Normalizes the adjacency matrix
 
 ############## Task 12
 # Set the feature of all nodes to the same value
-features = np.eye(n) # Generates node features
-
+# features = np.eye(n) # Generates node features
+features = np.ones((n, 1))
 
 # Yields indices to split data into training and test sets
 idx = np.random.RandomState(seed=42).permutation(n)
