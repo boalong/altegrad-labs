@@ -21,6 +21,10 @@ class GATLayer(nn.Module):
         ##################
         # your code here #
         ##################
+        z = self.fc(x)
+        indices = adj.coalesce().indices()
+        h = torch.cat((z[indices[0, :], :], z[indices[1, :], :]), dim=1)
+        h = self.leakyrelu(self.a(h))
 
         h = torch.exp(h.squeeze())
         unique = torch.unique(indices[0,:])
@@ -33,6 +37,7 @@ class GATLayer(nn.Module):
         ##################
         # your code here #
         ##################
+        out = torch.sparse.mm(adj_att, z)
 
         return out, alpha
 
@@ -54,5 +59,12 @@ class GNN(nn.Module):
         ##################
         # your code here #
         ##################
+        x, _ = self.mp1(x, adj)
+        x = self.relu(x)
+        x = self.dropout(x)
+        x, alpha = self.mp2(x, adj)
+        x = self.relu(x)
+        # print(x) # to verify claims of Q2
+        x = self.fc(x) 
 
-        return F.log_softmax(x, dim=1)
+        return F.log_softmax(x, dim=1), alpha
