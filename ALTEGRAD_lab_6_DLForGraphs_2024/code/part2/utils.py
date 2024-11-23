@@ -25,10 +25,11 @@ def create_dataset():
         y.append(1)
 
     permuted_indices = np.random.permutation(100)
-    Gs = Gs[permuted_indices]
-    y = y [permuted_indices]    
 
-    return Gs, y
+    Gs = [Gs[i] for i in permuted_indices]
+    y = [y[i] for i in permuted_indices]
+
+    return list(Gs), list(y)
 
 
 def sparse_mx_to_torch_sparse_tensor(sparse_mx):

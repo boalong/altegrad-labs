@@ -58,7 +58,21 @@ for epoch in range(epochs):
         ##################
         # your code here #
         ##################
+        len_batch = min(batch_size, N_train-i)
+        for j in range(i, i+len_batch):
+            nj = G_train[j].number_of_nodes()
+            A_tilde = nx.adjacency_matrix(G_train[j]) + sp.identity(nj)
+            adj_batch.append(A_tilde)
+            idx_batch.extend([j-i]*nj)
+            y_batch.append(y_train[j])
+        adj_batch = sp.block_diag(adj_batch)
+        features_batch = np.ones((adj_batch.shape[0], 1))
         
+        adj_batch = sparse_mx_to_torch_sparse_tensor(adj_batch).to(device)
+        idx_batch = torch.LongTensor(idx_batch).to(device)
+        y_batch = torch.LongTensor(y_batch).to(device)
+        features_batch = torch.FloatTensor(features_batch).to(device)
+
         optimizer.zero_grad()
         output = model(features_batch, adj_batch, idx_batch)
         loss = loss_function(output, y_batch)
@@ -92,6 +106,20 @@ for i in range(0, N_test, batch_size):
     ##################
     # your code here #
     ##################
+    len_batch = min(batch_size, N_test-i)
+    for j in range(i, i+len_batch):
+        nj = G_test[j].number_of_nodes()
+        A_tilde = nx.adjacency_matrix(G_test[j]) + sp.identity(nj)
+        adj_batch.append(A_tilde)
+        idx_batch.extend([j-i]*nj)
+        y_batch.append(y_test[j])
+    adj_batch = sp.block_diag(adj_batch)
+    features_batch = np.ones((adj_batch.shape[0], 1))
+
+    adj_batch = sparse_mx_to_torch_sparse_tensor(adj_batch)
+    idx_batch = torch.LongTensor(idx_batch).to(device)
+    y_batch = torch.LongTensor(y_batch).to(device)
+    features_batch = torch.FloatTensor(features_batch).to(device)
 
     output = model(features_batch, adj_batch, idx_batch)
     loss = loss_function(output, y_batch)
@@ -103,3 +131,9 @@ for i in range(0, N_test, batch_size):
 print('loss_test: {:.4f}'.format(test_loss / count),
       'acc_test: {:.4f}'.format(correct / count),
       'time: {:.4f}s'.format(time.time() - t))
+
+'''
+Epoch: 0191 loss_train: 0.2973 acc_train: 0.8778 time: 0.1990s
+Optimization finished!
+loss_test: 1.5381 acc_test: 0.4000 time: 0.2030s
+'''

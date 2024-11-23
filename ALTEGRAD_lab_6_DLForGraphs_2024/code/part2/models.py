@@ -23,6 +23,13 @@ class GNN(nn.Module):
         ##################
         # your code here #
         ##################
+        x = self.fc1(x_in)
+        x = torch.mm(adj, x)
+        x = self.relu(x)
+
+        x = self.fc2(x)
+        x = torch.mm(adj, x)
+        x = self.relu(x)
         
         idx = idx.unsqueeze(1).repeat(1, x.size(1))
         out = torch.zeros(torch.max(idx)+1, x.size(1)).to(self.device)
@@ -31,5 +38,9 @@ class GNN(nn.Module):
         ##################
         # your code here #
         ##################
+        out = self.fc3(out)
+        out = self.relu(out)
+
+        out = self.fc4(out)
 
         return F.log_softmax(out, dim=1)
