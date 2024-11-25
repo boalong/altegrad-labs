@@ -91,3 +91,17 @@ X_test_spectral = embeddings_spectral[idx_test,:]
 clf_spectral = LogisticRegression().fit(X_train_spectral, y_train)
 y_pred_spectral = clf_spectral.predict(X_test_spectral)
 print(f'Accuracy with spectral embeddings: {accuracy_score(y_test, y_pred_spectral)}')
+
+
+'''
+Output:
+
+Number of nodes: 34
+Number of edges: 78
+Generating walks
+100%|██████████| 34/34 [00:00<00:00, 411.52it/s]
+Training word2vec
+
+Accuracy with deepwalk embeddings: 1.0
+Accuracy with spectral embeddings: 0.8571428571428571
+'''

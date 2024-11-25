@@ -51,3 +51,14 @@ def visualize(model, n, dim):
 
 
 visualize(model, 100, n_dim)
+
+
+'''
+Output:
+
+Number of nodes: 33226
+Number of edges: 354529
+Generating walks
+100%|██████████| 33226/33226 [12:56<00:00, 42.76it/s] 
+Training word2vec
+'''

@@ -74,7 +74,7 @@ def train(epoch):
     t = time.time()
     model.train()
     optimizer.zero_grad()
-    output = model(features, adj)
+    output, _ = model(features, adj)
     loss_train = F.nll_loss(output[idx_train], y[idx_train])
     acc_train = accuracy_score(torch.argmax(output[idx_train], dim=1).detach().cpu().numpy(), y[idx_train].cpu().numpy())
     loss_train.backward()
@@ -88,7 +88,7 @@ def train(epoch):
 
 def test():
     model.eval()
-    output = model(features, adj)
+    output, _ = model(features, adj)
     loss_test = F.nll_loss(output[idx_test], y[idx_test])
     acc_test = accuracy_score(torch.argmax(output[idx_test], dim=1).detach().cpu().numpy(), y[idx_test].cpu().numpy())
     print("Test set results:",
@@ -106,3 +106,12 @@ print()
 
 # Testing
 test()
+
+
+'''
+Output, random features
+Test set results: loss= 0.0001 accuracy= 1.0000
+
+Output, dummy features
+Test set results: loss= 0.8735 accuracy= 0.4286
+'''
