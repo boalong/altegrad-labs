@@ -61,20 +61,16 @@ def get_vocab(train_docs, test_docs):
         
     return vocab
 
-path_to_train_set = '/home/onyxia/work/altegrad-labs/ALTEGRAD_lab_4_MLForGraphs_2024/code/datasets/train_5500_coarse.label'
-path_to_test_set = '/home/onyxia/work/altegrad-labs/ALTEGRAD_lab_4_MLForGraphs_2024/code/datasets/TREC_10_coarse.label'
+path_to_train_set = '../datasets/train_5500_coarse.label'
+path_to_test_set = '../datasets/TREC_10_coarse.label'
 
 # Read and pre-process train data
 train_data, y_train = load_file(path_to_train_set)
 train_data = preprocessing(train_data)
-#train_data = train_data[:100]
-#y_train = y_train[:100]
 
 # Read and pre-process test data
 test_data, y_test = load_file(path_to_test_set)
 test_data = preprocessing(test_data)
-#test_data = test_data[:100]
-#y_test = y_test[:100]
 
 # Extract vocabulary
 vocab = get_vocab(train_data, test_data)
@@ -145,9 +141,6 @@ y_pred = clf.predict(K_test)
 # Evaluate the predictions
 print("Accuracy, Weisfeiler-Lehman subtree kernel:", accuracy_score(y_pred, y_test))
 
-'''
-Accuracy, Weisfeiler-Lehman subtree kernel: 0.858
-'''
 
 #Task 14
 from grakel.kernels import (
@@ -220,18 +213,23 @@ kernels_to_test.append((HadamardCode, {"n_iter":1}))
 for kernel_class, params in kernels_to_test:
     evaluate_kernel(kernel_class, G_train, G_test, y_train, y_test, **params)
 
+
 '''
-Output for the kernels that can be computed in a reasonable time:
+Output:
+
+Vocabulary size:  7186
+Example of graph-of-words representation of document
+Accuracy, Weisfeiler-Lehman subtree kernel: 0.858
 
 Testing SvmTheta
-Accuracy, SvmTheta: 0.302
-Time: 73.13027381896973
+Accuracy, SvmTheta: 0.308
+Time: 41.327484130859375
 
 Testing VertexHistogram
 Accuracy, VertexHistogram: 0.864
-Time: 4.633118391036987
+Time: 1.2865419387817383
 
 Testing HadamardCode
 Accuracy, HadamardCode: 0.864
-Time: 122.49105095863342
+Time: 55.0876624584198
 '''

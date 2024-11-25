@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 import os
-os.chdir('/home/onyxia/altegrad-labs/ALTEGRAD_lab_4_MLForGraphs_2024/code')
+os.chdir('../')
 
 ############## Task 1
 G = nx.read_edgelist('datasets/CA-HepTh.txt', delimiter='\t')
@@ -24,3 +24,13 @@ n_nodes_largest = largest_c_subgraph.number_of_nodes()
 print(f'Number of nodes of the largest connected component: {n_nodes_largest}, {n_nodes_largest/n_nodes} of the total')
 n_edges_largest = largest_c_subgraph.number_of_edges()
 print(f'Number of edges of the largest connected component: {n_edges_largest}, {n_edges_largest/n_edges} of the total')
+
+'''
+Output:
+
+Number of nodes: 9877
+Number of edges: 25998
+Number of connected components: 429
+Number of nodes of the largest connected component: 8638, 0.8745570517363572 of the total
+Number of edges of the largest connected component: 24827, 0.9549580736979768 of the total
+'''

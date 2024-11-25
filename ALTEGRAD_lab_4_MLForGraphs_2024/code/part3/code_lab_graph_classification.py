@@ -10,17 +10,11 @@ from sklearn.metrics import accuracy_score
 from torch_geometric.datasets import TUDataset
 from torch_geometric.utils import to_networkx
 
-# import matplotlib.pyplot as plt
-# def visualize_graph(G, filename):
-#     plt.figure(figsize=(12, 5))
-#     nx.draw(G, with_labels=True, node_color='lightblue', 
-#             node_size=500, font_size=16, font_weight='bold')    
-#     plt.savefig(filename)
 
 ############## Task 7
 #load Mutag dataset
 def load_dataset():
-    dataset = TUDataset(root='tmp/MUTAG', name='MUTAG')
+    dataset = TUDataset(root='../datasets', name='MUTAG')
     Gs = [to_networkx(data, to_undirected=True) for data in dataset]
     y = [data.y.item() for data in dataset]
     return Gs, y
@@ -84,23 +78,6 @@ def shortest_path_kernel(Gs_train, Gs_test):
 
     return K_train, K_test
 
-# P4 = nx.Graph()
-# P4.add_nodes_from(range(4))
-# P4.add_edge(0,1)
-# P4.add_edge(1,2)
-# P4.add_edge(2,3)
-# visualize_graph(P4, 'glet.png')
-
-# C4 = nx.Graph()
-# C4.add_nodes_from(range(4))
-# C4.add_edge(0,1)
-# C4.add_edge(1,2)
-# C4.add_edge(2,3)
-# C4.add_edge(3,0)
-# visualize_graph(C4, 'fig.png')
-
-# print(shortest_path_kernel([P4, C4], [P4, C4]))
-
 
 ############## Task 8
 # Compute the graphlet kernel
@@ -132,7 +109,6 @@ def graphlet_kernel(Gs_train, Gs_test, n_samples=200):
             graphlet = G.subgraph(sampled_nodes)
             for j, glet in enumerate(graphlets):
                 phi_train[i, j] += int(nx.is_isomorphic(graphlet, glet))
-    #print(phi_train)
 
     phi_test = np.zeros((len(Gs_test), 4))
     for i, G in enumerate(Gs_test):
@@ -143,7 +119,6 @@ def graphlet_kernel(Gs_train, Gs_test, n_samples=200):
             graphlet = G.subgraph(sampled_nodes)
             for j, glet in enumerate(graphlets):
                 phi_test[i, j] += int(nx.is_isomorphic(graphlet, glet))
-    #print(phi_test)
 
     K_train = np.dot(phi_train, phi_train.T)
     K_test = np.dot(phi_test, phi_train.T)
@@ -153,20 +128,10 @@ def graphlet_kernel(Gs_train, Gs_test, n_samples=200):
 
 K_train_sp, K_test_sp = shortest_path_kernel(G_train, G_test)
 
+
 ############## Task 9
 K_train_graphlet, K_test_graphlet = graphlet_kernel(G_train, G_test)
 
-# G1 = nx.Graph()
-# G1.add_nodes_from(range(4))
-# G1.add_edge(0,1)
-# G1.add_edge(1,2)
-# G1.add_edge(2,3)
-# G1.add_edge(3,0)
-
-# G2 = nx.Graph()
-# G2.add_nodes_from(range(4))
-
-# print(graphlet_kernel([G1], [G2])[1])
 
 ############## Task 10
 # SP
@@ -180,3 +145,10 @@ clf_graphlet = SVC(kernel='precomputed')
 clf_graphlet.fit(K_train_graphlet, y_train)
 y_pred_graphlet = clf_graphlet.predict(K_test_graphlet)
 print(f'Accuracy with graphlet kernel: {accuracy_score(y_test, y_pred_graphlet)}')
+
+'''
+Output:
+
+Accuracy with shortest path kernel: 0.8947368421052632
+Accuracy with graphlet kernel: 0.868421052631579
+'''
