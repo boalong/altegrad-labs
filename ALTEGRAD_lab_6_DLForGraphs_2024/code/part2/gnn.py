@@ -132,8 +132,9 @@ print('loss_test: {:.4f}'.format(test_loss / count),
       'acc_test: {:.4f}'.format(correct / count),
       'time: {:.4f}s'.format(time.time() - t))
 
+
 '''
-Epoch: 0191 loss_train: 0.0770 acc_train: 0.9778 time: 0.1773s
+Epoch: 0191 loss_train: 0.2963 acc_train: 0.8556 time: 0.1514s
 Optimization finished!
-loss_test: 0.0426 acc_test: 1.0000 time: 0.2003s
+loss_test: 0.1281 acc_test: 1.0000 time: 0.1426s
 '''

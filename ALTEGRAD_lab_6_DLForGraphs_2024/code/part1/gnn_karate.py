@@ -94,9 +94,6 @@ print("Test set results:",
       "loss= {:.4f}".format(loss_test.item()),
       "accuracy= {:.4f}".format(acc_test))
 
-'''
-Test set results: loss= 0.0000 accuracy= 1.0000
-'''
 
 ############## Task 4
 _, alpha = model(features, adj) # your code here #
@@ -125,3 +122,10 @@ pos = nx.spring_layout(G_directed)
 arc_rad = 0.25
 nx.draw(G_directed, width=weights, connectionstyle=f'arc3, rad = {arc_rad}')
 plt.show()
+
+
+'''
+Output:
+
+Test set results: loss= 0.0000 accuracy= 1.0000
+'''
