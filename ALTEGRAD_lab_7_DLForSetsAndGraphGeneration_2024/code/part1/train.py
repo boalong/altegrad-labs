@@ -41,13 +41,15 @@ for epoch in range(epochs):
     count = 0
     idx = np.random.permutation(n_train)
     for i in range(0, n_train, batch_size):
-        
+        print(i)
         ############## Task 5
     
         ##################
         # your code here #
         ##################
-        
+        x_batch = torch.tensor(X_train[idx[i:min(i+batch_size, n_train)]], dtype=torch.int).to(device)
+        y_batch = torch.tensor(y_train[idx[i:min(i+batch_size, n_train)]], dtype=torch.float).to(device)
+
         optimizer.zero_grad()
         output = deepsets(x_batch)
         loss = loss_function(output, y_batch)
@@ -89,6 +91,8 @@ for epoch in range(epochs):
         ##################
         # your code here #
         ##################
+        x_batch = torch.tensor(X_train[idx[i:min(i+batch_size, n_train)]], dtype=torch.int).to(device)
+        y_batch = torch.tensor(y_train[idx[i:min(i+batch_size, n_train)]], dtype=torch.float).to(device)
         
         optimizer.zero_grad()
         output = lstm(x_batch)

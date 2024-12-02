@@ -10,7 +10,7 @@ class DeepSets(nn.Module):
         super(DeepSets, self).__init__()
         self.embedding = nn.Embedding(input_dim, embedding_dim)
         self.fc1 = nn.Linear(embedding_dim, hidden_dim)
-        self.fc2 = nn.Linear(hidden_dim, 1)
+        self.fc2 = nn.Linear(hidden_dim, 1) # pourquoi pas 1 -> 1 ?
         self.tanh = nn.Tanh()
 
     def forward(self, x):
@@ -20,6 +20,10 @@ class DeepSets(nn.Module):
         ##################
         # your code here #
         ##################
+        x = self.embedding(x)
+        x = self.tanh(self.fc1(x))
+        x = torch.sum(x, dim=1)
+        x = self.fc2(x)
         
         return x.squeeze()
 
@@ -39,5 +43,8 @@ class LSTM(nn.Module):
         ##################
         # your code here #
         ##################
+        x = self.embedding(x)
+        _, (x, _) = self.lstm(x)
+        x = self.fc(x)
         
         return x.squeeze()

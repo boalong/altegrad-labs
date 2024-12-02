@@ -51,20 +51,25 @@ for i in range(len(cards)):
         ##################
         # your code here #
         ##################
+        x_batch = X_test[i][j:min(j+batch_size, n_samples_per_card), :]
+        x_batch = torch.tensor(x_batch, dtype=torch.int).to(device)
+
+        y_pred_deepsets = deepsets(x_batch)
+        y_pred_lstm = lstm(x_batch)
         
     y_pred_deepsets = torch.cat(y_pred_deepsets)
     y_pred_deepsets = y_pred_deepsets.detach().cpu().numpy()
     
-    acc_deepsets = #your code here
-    mae_deepsets = #your code here
+    acc_deepsets = accuracy_score(y_pred_deepsets, y_test[i]) #your code here
+    mae_deepsets = mean_absolute_error(y_pred_deepsets, y_test[i]) #your code here
     results['deepsets']['acc'].append(acc_deepsets)
     results['deepsets']['mae'].append(mae_deepsets)
     
     y_pred_lstm = torch.cat(y_pred_lstm)
     y_pred_lstm = y_pred_lstm.detach().cpu().numpy()
     
-    acc_lstm = #your code here
-    mae_lstm = #your code here
+    acc_lstm = accuracy_score(y_pred_lstm, y_test[i]) #your code here
+    mae_lstm = mean_absolute_error(y_pred_lstm, y_test[i]) #your code here
     results['lstm']['acc'].append(acc_lstm)
     results['lstm']['mae'].append(mae_lstm)
 
