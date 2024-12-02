@@ -41,7 +41,7 @@ for epoch in range(epochs):
     count = 0
     idx = np.random.permutation(n_train)
     for i in range(0, n_train, batch_size):
-        print(i)
+
         ############## Task 5
     
         ##################

@@ -54,22 +54,22 @@ for i in range(len(cards)):
         x_batch = X_test[i][j:min(j+batch_size, n_samples_per_card), :]
         x_batch = torch.tensor(x_batch, dtype=torch.int).to(device)
 
-        y_pred_deepsets = deepsets(x_batch)
-        y_pred_lstm = lstm(x_batch)
+        y_pred_deepsets.append(deepsets(x_batch))
+        y_pred_lstm.append(lstm(x_batch))
         
     y_pred_deepsets = torch.cat(y_pred_deepsets)
     y_pred_deepsets = y_pred_deepsets.detach().cpu().numpy()
     
-    acc_deepsets = accuracy_score(y_pred_deepsets, y_test[i]) #your code here
-    mae_deepsets = mean_absolute_error(y_pred_deepsets, y_test[i]) #your code here
+    acc_deepsets = accuracy_score(np.round(y_pred_deepsets), y_test[i]) #your code here
+    mae_deepsets = mean_absolute_error(np.round(y_pred_deepsets), y_test[i]) #your code here
     results['deepsets']['acc'].append(acc_deepsets)
     results['deepsets']['mae'].append(mae_deepsets)
     
     y_pred_lstm = torch.cat(y_pred_lstm)
     y_pred_lstm = y_pred_lstm.detach().cpu().numpy()
     
-    acc_lstm = accuracy_score(y_pred_lstm, y_test[i]) #your code here
-    mae_lstm = mean_absolute_error(y_pred_lstm, y_test[i]) #your code here
+    acc_lstm = accuracy_score(np.round(y_pred_lstm), y_test[i]) #your code here
+    mae_lstm = mean_absolute_error(np.round(y_pred_lstm), y_test[i]) #your code here
     results['lstm']['acc'].append(acc_lstm)
     results['lstm']['mae'].append(mae_lstm)
 
@@ -79,3 +79,22 @@ for i in range(len(cards)):
 ##################
 # your code here #
 ##################
+abscisses = range(5, 101, 5)
+plt.plot(abscisses, results['deepsets']['acc'], label='Accuracy, DeepSets')
+plt.plot(abscisses, results['lstm']['acc'], label='Accuracy, LSTM')
+plt.xlabel('Cardinality of the input set')
+plt.legend()
+plt.savefig('acc.png')
+plt.show()
+plt.plot(abscisses, results['deepsets']['mae'], label='MAE, DeepSets')
+plt.plot(abscisses, results['lstm']['mae'], label='MAE, LSTM')
+plt.xlabel('Cardinality of the input set')
+plt.legend()
+plt.savefig('mae.png')
+plt.show()
+
+'''
+LSTM performs well only when the input has cardinality
+10 like in the train examples, contrary to Deepsets which 
+performs well no matter the cardinality
+'''
