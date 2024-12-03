@@ -39,13 +39,20 @@ class Decoder(nn.Module):
         ##################
         # your code here #
         ##################
+        for i in range(self.n_layers):
+            x = self.fc[i](x)
+        x = self.fc_proj(x)
+        x = torch.reshape(x, (-1, self.n_nodes, self.n_nodes))
+        adj = 0.5*(x + torch.transpose(x, 1, 2))
         
         return adj
 
 # Encoder
 class Encoder(nn.Module):
     def __init__(self, input_dim, hidden_dim, latent_dim, n_layers, dropout=0.2):
-        super(Encoder, self).__init__()        
+        super(Encoder, self).__init__()      
+        self.n_layers = n_layers # added
+  
         self.mlps = torch.nn.ModuleList()
         self.mlps.append(nn.Sequential(nn.Linear(input_dim, hidden_dim),  
                             nn.ReLU(),
@@ -71,6 +78,8 @@ class Encoder(nn.Module):
         ##################
         # your code here #
         ##################
+        for i in range(self.n_layers):
+            x = self.mlps[i](torch.mm(adj, x))
 
         # Readout
         idx = idx.unsqueeze(1).repeat(1, x.size(1))
@@ -111,8 +120,8 @@ class VariationalAutoEncoder(nn.Module):
         
         ############## Task 9
     
-        mu = # your code here
-        logvar = # your code here
+        mu = self.fc_mu(x_g) # your code here
+        logvar = self.fc_logvar(x_g) # your code here
         
         x_g = self.reparameterize(mu, logvar)
         adj = self.decoder(x_g)

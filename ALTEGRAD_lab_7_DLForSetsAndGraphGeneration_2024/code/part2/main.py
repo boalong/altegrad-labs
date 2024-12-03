@@ -141,8 +141,8 @@ autoencoder.eval()
 
 
 ############## Task 11
-z = # your code here #
-adj = # your code here #
+z = torch.randn(size=(5, latent_dim)).to(device) # your code here #
+adj = autoencoder.decode(z) # your code here #
 
 
 # Create and visualize graphs
